@@ -953,14 +953,7 @@ void main()
 				float HorizonAmount = min(1.0f + dot(R, NormalMapped), 1.0f);
 				HorizonAmount *= HorizonAmount * HorizonAmount;
 				
-                // Boost specular for metals 
-				if (PBRMap.y >= 0.1f) {
-                    SpecularIndirect *= 1.3f;
-                }
-				
-                // Specular AO 
-				SpecularIndirect *= SpecularAO;
-				SpecularIndirect *= HorizonAmount;
+				SpecularIndirect *= min(HorizonAmount * 0.9, 1.0f);
 
                 // Fresnel term 
                 vec3 FresnelTerm = FresnelSchlickRoughness(Lo, NormalMapped.xyz, vec3(F0), Roughness); 
