@@ -9,7 +9,7 @@ I intend to rewrite a voxel tracing engine in the future with much cleaner code/
 ## Features Implemented
 
 ### Rendering 
-- Voxel Ray Casting (Using the DDA Algrithm)
+- Voxel Ray Casting (Using the DDA Algorithm)
 - Manhattan distance field acceleration structure (Distance field generated using compute shaders on the GPU, so it can be generated dynamically.) 
 - Deferred rendering pipeline
 
