@@ -9,33 +9,32 @@ I intend to rewrite a voxel tracing engine in the future with much cleaner code/
 ## Features Implemented
 
 ### Rendering 
-- Voxel Ray Casting 
-- Manhattan distance field acceleration structure (Distance field generated using compute shaders on the GPU) 
+- Voxel Ray Casting (Using the DDA Algrithm)
+- Manhattan distance field acceleration structure (Distance field generated using compute shaders on the GPU, so it can be generated dynamically.) 
 - Deferred rendering pipeline
 
 ### Lighting 
 - Direct lighting based on the Cook torrance BRDF
 - Path traced lighting (Direct shadows, Global Illumination, Rough/Smooth reflections and Ambient Occlusion)
-- Spherical harmonic projection for indirect lighting 
+- Spherical harmonic projection for indirect lighting for detailed lighting
 - (Approximate) Screenspace Subsurface Scattering
-- Dynamic atmosphere/sky rendering
-- Relief Parallax Mapping
+- Dynamic semi-realistic atmosphere/sky rendering
 
 ### Denoising
-- Temporal Denoiser/Reprojection (used for Pathtraced Lighting, Volumetric Clouds and Antialiasing)
+- Temporal Denoiser (used for Pathtraced Lighting, Volumetric Clouds and Antialiasing)
 - Screenspace Spatial Denoiser (SVGF, Atrous, Gaussian and other specialized denoisers for direct shadow/reflections)
 
 ### Post Process
 
 - AO : SSAO
-- Misc : DOF, Bloom, Lens flare, Chromatic aberration, Basic SS god rays, night stars and nebula
-- Image : CAS
+- Misc : DOF, Bloom, Bloom spikes, Lens flare, Chromatic aberration, Basic SS god rays, night stars and nebula
+- Image : Contrast Adaptive Sharpening (Based on AMDs work.)
 - Anti Aliasing : FXAA, TXAA/TAA-U
 - Other Effects : Tonemapping, Gamma correction, color dithering, color grading, purkinje effect, film grain
 
 ### Volumetrics 
-- 3D Volumetric Clouds (+ 2D cirrus cloud layer)
-- LPV for volumetrics from light sources (could be used for distant lighting or performant second bounce gi in the future)
+- Volumetric Clouds
+- LPV for volumetrics from light sources (will be used for distant lighting or performant second bounce gi in the future)
 
 ### Others
 - Basic Particle system
