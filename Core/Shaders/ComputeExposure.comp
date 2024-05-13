@@ -21,6 +21,8 @@ uint TileCount = GridSize.x * GridSize.y;
 const float HistogramLogScale = 18.0f;
 const float HistogramLogZero = 220.0f;
 
+
+
 void main() {
 	uint CumulativeDensity = 0;
 	uint ClosestBinToMedian = 0;
@@ -44,7 +46,7 @@ void main() {
 
 	float CurrentExposure = max(o_Exposure, 0.0f);
 	float AverageLuma = exp((float(ClosestBinToMedian) - HistogramLogZero) / HistogramLogScale);
-	float KeyVal = 1.03f - 2.0f / (2.0f + log10(AverageLuma + 1.0));
+	float KeyVal = 1.03f - 2.0f / (2.0f + log(AverageLuma + 1.0));
 	float TargetExposure = KeyVal * 2.15f / clamp(AverageLuma, 0.001f, 5.01f);
 	float Speed = TargetExposure < CurrentExposure ? ExposureDecay : ExposureGrowth;
 

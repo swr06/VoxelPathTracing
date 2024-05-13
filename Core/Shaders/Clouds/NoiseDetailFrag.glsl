@@ -88,19 +88,19 @@ float GetPerlin_5_Octaves(vec3 p, bool tile)
 
     float a = 1.0;
     float perlin_value = 0.0;
-    perlin_value += a * Perlin(xyz, 1, tile).r;
+    perlin_value += a * Perlin(xyz, 1, tile);
     a *= amplitude_factor;
     xyz *= (frequency_factor + 0.02);
-    perlin_value += a * Perlin(xyz, 1, tile).r;
+    perlin_value += a * Perlin(xyz, 1, tile);
     a *= amplitude_factor;
     xyz *= (frequency_factor + 0.03);
-    perlin_value += a * Perlin(xyz, 1, tile).r;
+    perlin_value += a * Perlin(xyz, 1, tile);
     a *= amplitude_factor;
     xyz *= (frequency_factor + 0.01);
-    perlin_value += a * Perlin(xyz, 1, tile).r;
+    perlin_value += a * Perlin(xyz, 1, tile);
     a *= amplitude_factor;
     xyz *= (frequency_factor + 0.01);
-    perlin_value += a * Perlin(xyz, 1, tile).r;
+    perlin_value += a * Perlin(xyz, 1, tile);
 
     return perlin_value;
 }
@@ -112,19 +112,19 @@ float GetPerlin_5_Octaves(vec3 p, float s, bool tile)
     float a = 1.0;
 
     float perlin_value = 0.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
 
     return perlin_value;
 }
@@ -136,13 +136,13 @@ float GetPerlin_3_Octaves(vec3 p, float s, bool tile)
     float a = 1.0;
 
     float perlin_value = 0.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
 
     return perlin_value;
 }
@@ -154,25 +154,25 @@ float GetPerlin_7_Octaves(vec3 p, float s, bool tile)
     float a = 1.0;
 
     float perlin_value = 0.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
     a *= 0.5;
     f *= 2.0;
-    perlin_value += a * Perlin(xyz, s * f, tile).r;
+    perlin_value += a * Perlin(xyz, s * f, tile);
 
     return perlin_value;
 }

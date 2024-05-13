@@ -11,7 +11,7 @@
 #define clamp01(x) (clamp(x,0.0f,1.0F))
 #define square(x) (x*x)
 
-
+#define rcp(x) (1/x)
 
 
 
@@ -1483,7 +1483,7 @@ vec2 ProjectDirection(vec3 Direction, vec2 TextureSize)
 
 vec3 SampleLPVColor(vec3 UV) {
     uint BlockID = texture(u_LPVBlocks, UV).x;
-    return vec3(BlockAverageColorData[clamp(BlockID,0,128)]);
+    return vec3(BlockAverageColorData[clamp(BlockID,0u,128u)]);
 }   
 
 
@@ -1510,7 +1510,7 @@ vec3 InterpolateLPVColorDithered(vec3 UV)
 
 vec3 SampleLPVColorTexel(ivec3 Texel, int L) {
     uint BlockID = texelFetch(u_LPVBlocks, Texel, 0).x;
-    return vec3(BlockAverageColorData[clamp(BlockID,0,128)]);
+    return vec3(BlockAverageColorData[clamp(BlockID,0u,128u)]);
 }   
 
 vec3 SampleLPVData(vec3 UV)

@@ -23,6 +23,9 @@ static VoxelRT::OrthographicCamera OCamera(0.0f, 800.0f, 0.0f, 600.0f);
 // Flags
 static bool ModifiedWorld = false;
 
+// Misc print
+static bool PrintDebugcallback = true;
+
 // Timings
 static float Frametime;
 static float DeltaTime;
@@ -366,6 +369,9 @@ public:
 				ImGui::Text("Temporal Center Depth (x1000) : %f", CenterDepthSmooth * 1000.0f);
 			}
 
+			ImGui::NewLine();
+			ImGui::Checkbox("PRINT OPENGL DEBUG CALLBACK OUTPUT?", &PrintDebugcallback);
+			ImGui::NewLine();
 			ImGui::NewLine();
 			ImGui::Checkbox("Highlight focused block?", &HighlightFocusedBlock);
 			ImGui::SliderFloat("Mouse Sensitivity", &MainPlayer.Sensitivity, 0.025f, 1.0f);
@@ -1609,6 +1615,8 @@ void VoxelRT::MainPipeline::StartPipeline()
 	// Application loop
 	while (!glfwWindowShouldClose(app.GetWindow()))
 	{
+		SetCallbackPrinting(PrintDebugcallback);
+
 		// Round all resolutions to maintain consistency
 		ShadowSupersampleRes = glm::max(ShadowSupersampleRes, ShadowTraceResolution);
 		InitialTraceResolution = RoundToNearest(InitialTraceResolution, 0.125f);

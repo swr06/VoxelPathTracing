@@ -236,24 +236,24 @@ float MarchODShadow(vec3 Point, vec3 Lo)
 
 vec3 SampleVolumetricColor(vec3 UV) {
     uint BlockID = texture(u_VolumetricColorDataSampler, UV).x;
-    return vec3(BlockAverageColorData[clamp(BlockID,0,128)]);
+    return vec3(BlockAverageColorData[clamp(BlockID,0u,128u)]);
 
 }   
 
 vec3 SampleVolumetricColor(vec3 UV, float D) {
     uint BlockID = texture(u_VolumetricColorDataSampler, UV+D*0.5f*(1.0f/vec3(384.0f,128.0f,384.0f))).x;
-    return vec3(BlockAverageColorData[clamp(BlockID,0,128)]);
+    return vec3(BlockAverageColorData[clamp(BlockID,0u,128u)]);
 }   
 
 vec3 SampleVolumetricColorTexel(ivec3 Texel) {
     uint BlockID = texelFetch(u_VolumetricColorDataSampler, Texel, 0).x;
-    return vec3(BlockAverageColorData[clamp(BlockID,0,128)]);
+    return vec3(BlockAverageColorData[clamp(BlockID,0u,128u)]);
 
 }   
 
 vec3 SampleVolumetricColorTexel(ivec3 Texel, int LOD) {
     uint BlockID = texelFetch(u_VolumetricColorDataSampler, Texel, LOD).x;
-    return vec3(BlockAverageColorData[clamp(BlockID,0,128)]);
+    return vec3(BlockAverageColorData[clamp(BlockID,0u,128u)]);
 
 }   
 

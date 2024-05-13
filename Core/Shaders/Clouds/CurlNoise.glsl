@@ -343,7 +343,7 @@ float DilatePerlinWorley(float p, float w, float x)
     {
         x = x / 0.5;
         float n = p + w * x;
-        return n * mix(1, 0.5, pow(x, curve));
+        return n * mix(1., 0.5, pow(x, curve));
     }
     else
     {

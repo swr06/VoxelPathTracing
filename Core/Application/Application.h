@@ -95,4 +95,6 @@ namespace VoxelRT
 		int m_CurrentHeight = 0;
 		bool m_CursorLocked = false;
 	};
+
+	void SetCallbackPrinting(bool x);
 }

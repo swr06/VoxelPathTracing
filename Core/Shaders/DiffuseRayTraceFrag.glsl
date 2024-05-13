@@ -25,6 +25,8 @@
 #define Bayer128(a) (Bayer64( 0.5 * (a)) * 0.25 + Bayer2(a))
 #define Bayer256(a) (Bayer128(0.5 * (a)) * 0.25 + Bayer2(a))
 
+#define rcp(x) (1/x)
+
 #define EPSILON 0.0001f
 
 // Outputs diffuse indirect

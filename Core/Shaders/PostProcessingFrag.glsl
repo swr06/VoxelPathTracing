@@ -444,9 +444,12 @@ vec2 Hash2(vec3 p3) {
 	return fract((p3.xx + p3.yz) * p3.zy);
 }
 
-float LinearStep(float e0, float e1, float x) { return clamp01((x - e0) / (e1 - e0)); }
+float LinearStep(float e0, float e1, float x) 
+{ 
+	return clamp((x - e0) / (e1 - e0), 0.0f, 1.0f); 
+}
 
-vec2 ProjectDirection(vec3 Direction, vec2);
+vec2 ProjectDirection(vec3 Direction, vec2 TextureSize);
 
 vec3 ShadeStars(vec3 sky, vec3 Lo, float sv, float base_transmittance)
 {

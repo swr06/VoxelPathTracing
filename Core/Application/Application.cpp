@@ -15,6 +15,8 @@ namespace VoxelRT
 	void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 	void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 
+	static bool PrintDebugCallback = true;
+
 	/*
 	The OpenGL Debug callback
 	*/
@@ -22,6 +24,10 @@ namespace VoxelRT
 		GLenum severity, GLsizei length,
 		const GLchar* msg, const void* data)
 	{
+		if (!PrintDebugCallback) {
+			return;
+		}
+
 		char* _source;
 		char* _type;
 		char* _severity;
@@ -420,5 +426,10 @@ namespace VoxelRT
 		e.window = window;
 		e.ts = glfwGetTime();
 		QueueEvent(e, window);
+	}
+
+	void SetCallbackPrinting(bool x)
+	{
+		PrintDebugCallback = x;
 	}
 }
