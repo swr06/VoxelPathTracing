@@ -56,7 +56,7 @@ I intend to rewrite a voxel tracing engine in the future with much cleaner code/
 
 - 20 - 22 FPS on a Vega 8 iGPU on the default low preset. (@ 768p)
 - 30 - 34 FPS on a Vega 11 iGPU on the default low preset. (@ 768p)
-- 150 - 160 FPS on a GTX 1080Ti. (@ 1080p)
+- 150 - 160 FPS on a GTX 1080Ti. (@ 768p)
 
 ## Note
 - This project is still very experimental, it is not a finished product as of yet.
