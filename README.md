@@ -75,7 +75,7 @@ I intend to rewrite a voxel tracing engine in the future with much cleaner code/
 - [Tui Vao](https://github.com/Tui-Vao)
 
 ## License
-- MIT (See LICENSE)
+- MIT License. (See LICENSE in repository)
 
 ## Notice
 This project is purely educational. I own none of the assets. All the rights go to their respective owners.
