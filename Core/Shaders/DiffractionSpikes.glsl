@@ -1,4 +1,4 @@
-// Original shader & technique by UglySwedishFish 
+// huge thanks to uglyswedishfish for help with understanding this!
 
 #version 330 core
 
