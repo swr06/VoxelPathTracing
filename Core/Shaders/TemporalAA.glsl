@@ -29,6 +29,8 @@ uniform mat4 u_Projection;
 // TAA flag 
 uniform bool u_Enabled;
 
+uniform float u_ColorBiasMultiplier;
+
 // true if the world was modified this frame 
 uniform bool u_BlockModified;
 
@@ -129,7 +131,7 @@ vec2 GetNearestDepths3x4(vec2 Reprojected, out bool SkyEdge)
 			// Current gbuffer depths 
 			float SampleDepth = texture(u_PositionTexture, v_TexCoords + vec2(x,y) * TexelSize).x;
 			float EffectiveDepth = SampleDepth;
-			EffectiveDepth = EffectiveDepth < 0.0f ? 995.0f : EffectiveDepth;
+			EffectiveDepth = EffectiveDepth < 0.0f ? 10000.0f : EffectiveDepth;
 			
 			if (EffectiveDepth < MinEffectiveCurrentDepth) {
 				MinCurrentDepth = SampleDepth;
@@ -141,7 +143,7 @@ vec2 GetNearestDepths3x4(vec2 Reprojected, out bool SkyEdge)
 			// Previous gbuffer samples
 			float SamplePrevDepth = texture(u_PreviousPositionTexture, Reprojected + vec2(x,y) * TexelSize).x;
 			float EffectivePrevDepth = SamplePrevDepth;
-			EffectivePrevDepth = EffectivePrevDepth < 0.0f ? 995.0f : EffectivePrevDepth;
+			EffectivePrevDepth = EffectivePrevDepth < 0.0f ? 10000.0f : EffectivePrevDepth;
 			
 			if (EffectivePrevDepth < MinEffectivePreviousDepth) {
 				MinPreviousDepth = SamplePrevDepth;
@@ -192,7 +194,7 @@ vec4 CatmullRom(sampler2D tex, in vec2 uv)
 }
 
 // Samples history texture and applies neighbourhood clipping
-vec3 SampleHistory(vec2 Reprojected, vec4 WorldPosition, float Bias) 
+vec3 SampleHistory(vec2 Reprojected, vec4 WorldPosition, bool Sky, in float biasfac) 
 {
 	const int KernelX = 1;
 	const int KernelY = 2;
@@ -211,11 +213,13 @@ vec3 SampleHistory(vec2 Reprojected, vec4 WorldPosition, float Bias)
         }
     }
 
+	float Bias = mix(0.0001f, 0.11f, clamp(biasfac*u_ColorBiasMultiplier,0.,1.));
+
 	MinColor -= Bias;
 	MaxColor += Bias;
 
 	vec3 ReprojectedColor = Reinhard(CatmullRom(u_PreviousColorTexture, Reprojected).xyz);
-    return (AABBClip((ReprojectedColor), (MinColor), (MaxColor))).xyz;
+    return AABBClip((ReprojectedColor), (MinColor), (MaxColor)).xyz;
 }
 
 void main()
@@ -277,32 +281,15 @@ void main()
 		CurrentColor = Reinhard(CurrentColor);
 
 		// History color 
-
-		float ClipBias = 0.06f;
-
-		if (PannedCamera) {
-			ClipBias = 0.03f;
-
-			if (AggressivePan) {
-				ClipBias = 0.01f;
-			}
-		}
-
-		if (Moved) {
-			ClipBias = 0.0000001f;
-		}
-
-		// More aggressive clipping for sky 
-		ClipBias *= Sky ? 0.2f : 1.0f;
-
-		vec3 PrevColor = SampleHistory(PreviousCoord, WorldPosition.xyzw, ClipBias);
+		bool SkySample = false;
+		vec2 MinDepths = GetNearestDepths3x4(PreviousCoord, SkySample);
+		float factor = 1. - exp(-pow((1./MinDepths.x) / 200.0f, 3.0f));
+		vec3 PrevColor = SampleHistory(PreviousCoord, WorldPosition.xyzw, Sky, factor);
 
 		// Velocity vector 
 		vec2 Velocity = (TexCoord - PreviousCoord.xy) * Dimensions;
 		float BlendFactor = exp(-length(Velocity)) * 0.75f + 0.7f;
 		BlendFactor = clamp(BlendFactor, 0.0f, 0.975f);
-
-		bool SkySample = false;
 
 		// Depth rejection ->
 		if (u_DepthWeight) {
@@ -320,7 +307,6 @@ void main()
 				BaseExp = 32.0f;
 			}
 
-			vec2 MinDepths = GetNearestDepths3x4(PreviousCoord, SkySample);
 			bool MovedThresh = distance(u_View[3].xyz, u_PrevView[3].xyz) > 0.001f;
 			float DepthRejection = mix(mix(pow(exp(-abs(MinDepths.x - MinDepths.y)), BaseExp * u_DepthExponentMultiplier), 1.0f, (MovedThresh ? 0.0f : 0.5f)), 1.0f, SkySample ? 0.9f : 0.0f);
 			DepthRejection = clamp(DepthRejection, 0.0f, 1.0f);
@@ -339,12 +325,13 @@ void main()
 		if (DebugTAA)
 			o_Color = vec3(BlendFactor);
 
-
 	}
 
 	else 
 	{
 		o_Color = CurrentColor;
 	}
+
+
 }
 

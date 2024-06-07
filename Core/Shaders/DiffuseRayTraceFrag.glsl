@@ -5,6 +5,8 @@
 
 #version 450 core
 
+#define clamp01(x) clamp(x,0.,1.)
+
 #define WORLD_SIZE_X 384
 #define WORLD_SIZE_Y 128
 #define WORLD_SIZE_Z 384
@@ -182,10 +184,6 @@ float Bayer2(vec2 a)
 
 const bool CAUSTICS = false;
 
-// Colors 
-const vec3 SUN_COLOR = (vec3(192.0f, 216.0f, 255.0f) / 255.0f) * (16.0f);
-const vec3 NIGHT_COLOR  = (vec3(96.0f, 192.0f, 255.0f) / 255.0f) * 1.5f; 
-const vec3 DUSK_COLOR  = (vec3(96.0f, 192.0f, 255.0f) / 255.0f) * 0.9f; 
 
 // basic fract(sin) pseudo random number generator
 float HASH2SEED = 0.0f;
@@ -821,6 +819,94 @@ vec2 SampleBlueNoise2D(int Index)
 	return Noise;
 }
 
+float SRGBToLinear(float x){
+    return x > 0.04045 ? pow(x * (1 / 1.055) + 0.0521327, 2.4) : x / 12.92;
+}
+
+vec3 SRGBToLinearVec3(vec3 x){
+    return vec3(SRGBToLinear(x.x),
+                SRGBToLinear(x.y),
+                SRGBToLinear(x.z));
+}
+
+const mat3x3 xyzToRGBMatrix = mat3(
+    3.1338561, -1.6168667, -0.4906146,
+    -0.9787684,  1.9161415,  0.0334540,
+    0.0719453, -0.2289914,  1.4052427
+);
+
+const mat3x3 rgbToXYZMatrix = mat3(
+    vec3(0.5149, 0.3244, 0.1607),
+    vec3(0.3654, 0.6704, 0.0642),
+    vec3(0.0248, 0.1248, 0.8504)
+);
+
+vec3 XYZToRGB(in vec3 xyz) 
+{
+    float r = dot(xyz, xyzToRGBMatrix[0]);
+    float g = dot(xyz, xyzToRGBMatrix[1]);
+    float b = dot(xyz, xyzToRGBMatrix[2]);
+    return vec3(r, g, b);
+}
+
+vec3 RGBToXYZ(in vec3 rgb) 
+{
+    float x = dot(rgb, rgbToXYZMatrix[0]);
+    float y = dot(rgb, rgbToXYZMatrix[1]);
+    float z = dot(rgb, rgbToXYZMatrix[2]);
+    return vec3(x, y, z);
+}
+
+vec3 TemperatureToRGB(float temperatureInKelvins)
+{
+	vec3 retColor;
+	
+    temperatureInKelvins = clamp(temperatureInKelvins, 1000, 50000) / 100;
+    
+    if (temperatureInKelvins <= 66){
+        retColor.r = 1;
+        retColor.g = clamp01(0.39008157876901960784 * log(temperatureInKelvins) - 0.63184144378862745098);
+    } else {
+    	float t = temperatureInKelvins - 60;
+        retColor.r = clamp01(1.29293618606274509804 * pow(t, -0.1332047592));
+        retColor.g = clamp01(1.12989086089529411765 * pow(t, -0.0755148492));
+    }
+    
+    if (temperatureInKelvins >= 66)
+        retColor.b = 1;
+    else if(temperatureInKelvins <= 19)
+        retColor.b = 0;
+    else
+        retColor.b = clamp01(0.54320678911019607843 * log(temperatureInKelvins - 10) - 1.19625408914);
+
+    return SRGBToLinearVec3(retColor);
+}     
+
+
+vec3 SetColorLuminance(vec3 Color, float L) {
+    Color = RGBToXYZ(Color);
+    Color.y = L;
+    Color = XYZToRGB(Color);
+    return Color;
+}
+
+vec3 SetColorLuminance(vec3 Color, vec3 Color2) {
+    Color = RGBToXYZ(Color);
+    Color.y = RGBToXYZ(Color2).y;
+    Color = XYZToRGB(Color);
+    return Color;
+}
+
+
+vec3 SampleSunColor()
+{
+    const vec3 TemperatureModifier = TemperatureToRGB(5778.0f);
+    vec3 SunTransmittance = texture(u_Skymap, u_SunDirection.xyz).xyz;
+    vec3 SunColor = SunTransmittance;
+    SunColor *= TemperatureModifier;
+    return SunColor * PI * 2.2f * u_GISunStrength;
+}
+
 void main()
 {
 	// Compute globals
@@ -833,12 +919,10 @@ void main()
 
 	bool SunStronger = -u_SunDirection.y < 0.01f ? true : false;
 	float DuskVisibility = clamp(pow(distance(u_SunDirection.y, 1.0), 2.9), 0.0f, 1.0f);
-    vec3 SunColor = mix(SUN_COLOR, DUSK_COLOR, DuskVisibility);
-	LIGHT_COLOR = SunStronger ? SunColor : NIGHT_COLOR;
-	LIGHT_COLOR *= 0.4f*u_GISunStrength;
+	LIGHT_COLOR = SunStronger ? SampleSunColor() : vec3(1.);
 	StrongerLightDirection = SunStronger ? u_SunDirection : u_MoonDirection;
 	Moonstronger = !SunStronger;
-	EmissivityMultiplier = Moonstronger ? 13.0f : 12.0f;
+	EmissivityMultiplier = 12.;
 
 
 	o_AOAndSkyLighting = vec2(1.0f, 0.0f);

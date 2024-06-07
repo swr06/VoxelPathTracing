@@ -83,6 +83,8 @@ static bool APPLY_PLAYER_SHADOW_FOR_GI = false;
 static bool LightListDebug = false; // Direct sampling/MIS (WIP!)
 
 // SVGF / Upscaling
+static bool DoSpatialUpscale = true;
+
 static bool AGGRESSIVE_DISOCCLUSION_HANDLING = true;
 static bool SVGF_LARGE_KERNEL = false;
 static float ColorPhiBias = 3.325f;
@@ -152,6 +154,7 @@ const bool TAADepthWeight = true;
 static float TAADepthWeightExp = 2.0f;
 static bool FXAA = true;
 static bool BrutalFXAA = true;
+static float ColorBiasMultiplier = 1.;
 
 // Post process
 static float SSAOResolution = 0.5f;
@@ -322,6 +325,12 @@ static glm::vec3 SnapPosition(glm::vec3 p, float ax, float ay, float az) {
 	return p;
 }
 
+
+bool IsMouseOverAnyImGuiWindow() {
+	ImGuiIO& io = ImGui::GetIO();
+	return io.WantCaptureMouse;
+}
+
 // Application
 class RayTracerApp : public VoxelRT::Application
 {
@@ -348,8 +357,10 @@ public:
 		if (ImGui::Begin("Settings"))
 		{
 
-			if (ADVANCED_MODE)
+			if (ADVANCED_MODE) {
 				ImGui::Checkbox("Debug Variable", &RandomDebugVar);
+				ImGui::Text("Mouse over any window : %d", (int)IsMouseOverAnyImGuiWindow());
+			}
 
 			ImGui::Text("Player Position : %f, %f, %f", MainCamera.GetPosition().x, MainCamera.GetPosition().y, MainCamera.GetPosition().z);
 			ImGui::Text("Camera Front : %f, %f, %f", MainCamera.GetFront().x, MainCamera.GetFront().y, MainCamera.GetFront().z);
@@ -413,6 +424,8 @@ public:
 				GLOBAL_RESOLUTION_SCALE = 1.0f;
 			}
 			ImGui::NewLine();
+			ImGui::Checkbox("Spatial Upscaling", &DoSpatialUpscale);
+			ImGui::NewLine();
 
 			// Sun/Moon ->
 			ImGui::NewLine();
@@ -443,7 +456,7 @@ public:
 			ImGui::SliderFloat("Initial Trace Resolution", &InitialTraceResolution, 0.1f, 1.0f);
 			ImGui::SliderFloat("GBuffer Generate Resolution", &GBufferResolution, 0.1f, 1.0f);
 			if (ADVANCED_MODE)
-				ImGui::SliderInt("DF Trace Length.", &RenderDistance, 20, 500);
+				ImGui::SliderInt("DF Trace Length.", &RenderDistance, 20, 600);
 			ImGui::NewLine();
 
 
@@ -788,6 +801,7 @@ public:
 			//ImGui::Checkbox("TAA Depth Weight (Reduces ghosting)", &TAADepthWeight);
 
 			if (TAA) {
+				ImGui::SliderFloat("TAA Clip Bias (Lower = more aliased but lesser ghosting)", &ColorBiasMultiplier, 0.0f, 4.0f);
 				ImGui::SliderFloat("TAA Depth Weight Strength (Higher = Lesser ghosting, might cause higher aliasing)", &TAADepthWeightExp, 0.1f, 8.0f);
 				ImGui::Checkbox("Jitter Projection Matrix For TAA? (small issues, right now :( ) ", &JitterSceneForTAA);
 			}
@@ -978,7 +992,9 @@ public:
 		if (e.type == VoxelRT::EventTypes::MouseScroll)
 		{
 			float Sign = e.msy < 0.0f ? 1.0f : -1.0f;
-			MainCamera.SetFov(MainCamera.GetFov() + 2.0f * Sign);
+			if (!IsMouseOverAnyImGuiWindow()) {
+				MainCamera.SetFov(MainCamera.GetFov() + 2.0f * Sign);
+			}
 			MainCamera.SetFov(glm::clamp(MainCamera.GetFov(), 4.0f, 89.0f));
 		}
 
@@ -3686,6 +3702,7 @@ void VoxelRT::MainPipeline::StartPipeline()
 		ColorShader.SetBool("u_DitherPOM", DitherPOM);
 		ColorShader.SetBool("u_DoVXAO", VXAO);
 		ColorShader.SetBool("u_SVGFEnabled", USE_SVGF);
+		ColorShader.SetBool("u_DoSpatialUpscale", DoSpatialUpscale);
 		ColorShader.SetInteger("u_DebugLevel", DEBUG_LEVEL);
 		ColorShader.SetBool("u_ShouldDitherUpscale", DITHER_SPATIAL_UPSCALE);
 		ColorShader.SetBool("u_UseDFG", true);
@@ -3850,6 +3867,7 @@ void VoxelRT::MainPipeline::StartPipeline()
 		TemporalAAShader.SetBool("u_BlockModified", ModifiedWorld);
 		TemporalAAShader.SetBool("u_DepthWeight", TAADepthWeight);
 		TemporalAAShader.SetFloat("u_DepthExponentMultiplier", TAADepthWeightExp);
+		TemporalAAShader.SetFloat("u_ColorBiasMultiplier", ColorBiasMultiplier);
 
 		TemporalAAShader.SetMatrix4("u_PrevProjection", PreviousProjection);
 		TemporalAAShader.SetMatrix4("u_PrevView", PreviousView);

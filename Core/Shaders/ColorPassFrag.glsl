@@ -77,6 +77,7 @@ uniform int u_LPVDebugState; // Debug state
 
 uniform sampler2D u_DebugTexture; 
 
+uniform bool u_DoSpatialUpscale;
 
 uniform vec3 u_SunDirection;
 uniform vec3 u_MoonDirection;
@@ -534,9 +535,8 @@ bool IsImmediateNeighbour(ivec2 x) {
 
 void SpatiallyUpscaleBuffers(vec3 BaseNormal, vec3 BaseHFNormal, float BaseRoughness, float BaseLinearDepth, out vec4 SH, out vec2 CoCg, out vec4 SpecularIndirect, out float ShadowSample, bool fuckingsmooth, out float ao)
 {
-    const bool DoSpatialUpscaling = true;
 
-    if (! DoSpatialUpscaling) {
+    if (! u_DoSpatialUpscale) {
         vec2 SampleCoord = g_TexCoords;
         SH = texture(u_DiffuseSHy, SampleCoord).xyzw;
 		CoCg += texture(u_DiffuseCoCg, SampleCoord).xy;

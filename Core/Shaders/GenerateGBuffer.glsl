@@ -389,11 +389,11 @@ void main() {
 
 	UV = 1.0f - UV;
 
-    vec3 NormalMapped = IsLava ? (texture(u_LavaTextures[1], DistortedUV).xyz) : (textureGrad(u_BlockNormals, vec3(UV, data.y), UVDerivative.xy, UVDerivative.zw).xyz);
+    vec3 NormalMapped = IsLava ? (texture(u_LavaTextures[1], DistortedUV).xyz) : (texture(u_BlockNormals, vec3(UV, data.y)).xyz);
     NormalMapped = NormalMapped * 2.0f - 1.0f;
     NormalMapped = tbn * NormalMapped;
 
-    vec4 PBRMap = textureGrad(u_BlockPBR, vec3(UV, data.z), UVDerivative.xy, UVDerivative.zw).xyzw;
+    vec4 PBRMap = texture(u_BlockPBR, vec3(UV, data.z)).xyzw;
     float Emissivity = data.w > -0.5f ? texture(u_BlockEmissive, vec3(UV, data.w)).x : 0.0f;
 
     o_Normal = NormalMapped;
@@ -405,7 +405,7 @@ void main() {
 
     o_TextureAO = clamp(o_TextureAO, 0.00000001f, 1.0f);
 
-    vec3 AlbedoColor = IsLava ? (texture(u_LavaTextures[0], DistortedUV).xyz) : textureGrad(u_BlockAlbedos, vec3(UV, data.x), UVDerivative.xy, UVDerivative.zw).rgb;
+    vec3 AlbedoColor = IsLava ? (texture(u_LavaTextures[0], DistortedUV).xyz) : texture(u_BlockAlbedos, vec3(UV, data.x), 0.).rgb;
 
     o_Albedo = AlbedoColor;
 
