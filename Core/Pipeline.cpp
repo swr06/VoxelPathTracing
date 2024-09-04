@@ -155,6 +155,7 @@ static float TAADepthWeightExp = 2.0f;
 static bool FXAA = true;
 static bool BrutalFXAA = true;
 static float ColorBiasMultiplier = 1.;
+static float TAABiasAdder = 0.;
 
 // Post process
 static float SSAOResolution = 0.5f;
@@ -169,14 +170,14 @@ static bool ExponentialFog = false;
 
 // Clouds ->
 static bool CloudsEnabled = true;
-static float CloudCoverage = 1.1f;
+static float CloudCoverage = 1.25f;
 static const bool CloudBayer = true;
 static float CloudDetailScale = 1.1f;
-static float CloudErosionWeightExponent = 0.56f;
-static float CloudDetailFBMPower = 1.125f;
+static float CloudErosionWeightExponent = 0.750f;
+static float CloudDetailFBMPower = 1.0f;
 static bool CloudDetailWeightEnabled = false;
 static bool ClampCloudTemporal = false;
-static glm::vec2 CloudModifiers = glm::vec2(-0.950, 0.1250f);
+static glm::vec2 CloudModifiers = glm::vec2(-1.330, 0.1250f);
 static bool CurlNoiseOffset = false;
 static float CirrusScale = 1.8667f;
 static float CirrusStrength = 0.11f;
@@ -189,8 +190,8 @@ static float CloudForceSupersampleRes = 1.0f;
 static float CloudResolution = 0.250f;
 static bool CloudSpatialUpscale = true;
 static bool CloudFinalCatmullromUpsample = false;
-static float CloudAmbientDensityMultiplier = 1.2f;
-static float CloudThiccness = 1250.0f;
+static float CloudAmbientDensityMultiplier = 1.25f;
+static float CloudThiccness = 525.0f;
 static bool CloudReflections = true;
 
 // Nebula
@@ -801,6 +802,7 @@ public:
 			//ImGui::Checkbox("TAA Depth Weight (Reduces ghosting)", &TAADepthWeight);
 
 			if (TAA) {
+				ImGui::SliderFloat("TAA Clip Bias Adder (INCREASE IF THERE IS FLICKERING, NOTE : SIGNIFICANTLY INCREASES GHOSTING)", &TAABiasAdder, 0.0f, 1.0f);
 				ImGui::SliderFloat("TAA Clip Bias (Lower = more aliased but lesser ghosting)", &ColorBiasMultiplier, 0.0f, 4.0f);
 				ImGui::SliderFloat("TAA Depth Weight Strength (Higher = Lesser ghosting, might cause higher aliasing)", &TAADepthWeightExp, 0.1f, 8.0f);
 				ImGui::Checkbox("Jitter Projection Matrix For TAA? (small issues, right now :( ) ", &JitterSceneForTAA);
@@ -945,30 +947,35 @@ public:
 			{
 				InitialTraceResolution = 1.0f;
 				ShadowTraceResolution = 0.75f;
-				DiffuseSPP = 8;
-				ColorPhiBias = 3.5f;
-				ReflectionTraceResolution = 0.25f;
-				DiffuseTraceResolution = 0.25f;
+				DiffuseSPP = 1;
+				ReflectionSPP = 1;
+				ColorPhiBias = 1.2f;
+				ReflectionTraceResolution = 0.5f;
+				DiffuseTraceResolution = 0.5f;
 				RTAO = false;
 			}
 
 			if (ImGui::Button("HIGH") == true) {
 				InitialTraceResolution = 1.0f;
-				ShadowTraceResolution = 0.75f;
+				ShadowTraceResolution = 1.0f;
 				DiffuseSPP = 2;
-				ColorPhiBias = 3.25f;
+				ReflectionSPP = 1;
+				ColorPhiBias = 1.4f;
 				ReflectionTraceResolution = 0.5f;
 				DiffuseTraceResolution = 0.5f;
+				CloudResolution = 0.5;
 				RTAO = false;
 			}
 
 			if (ImGui::Button("INSANE") == true) {
 				InitialTraceResolution = 1.0f;
 				ShadowTraceResolution = 1.0f;
-				ReflectionTraceResolution = 0.5f;
-				DiffuseTraceResolution = 0.5f;
-				DiffuseSPP = 4;
-				ColorPhiBias = 3.5f;
+				ReflectionTraceResolution = 1.0f;
+				DiffuseTraceResolution = 1.0f;
+				DiffuseSPP = 1;
+				ReflectionSPP = 1;
+				CloudResolution = 1.0f;
+				ColorPhiBias = 1.3f;
 				RTAO = false;
 			}
 
@@ -1272,41 +1279,41 @@ void VoxelRT::MainPipeline::StartPipeline()
 		// Defaults.
 	}
 
-	if (HardwareProfile == 1)
+
+	if (HardwareProfile==1)
 	{
 		InitialTraceResolution = 1.0f;
 		ShadowTraceResolution = 0.75f;
-		DiffuseSPP = 6;
-		ColorPhiBias = 3.5f;
-		ReflectionTraceResolution = 0.25f;
-		DiffuseTraceResolution = 0.25f;
-		RTAO = false;
-	}
-
-	if (HardwareProfile == 2)
-	{
-		InitialTraceResolution = 1.0f;
-		ShadowTraceResolution = 0.75f;
-		DiffuseSPP = 2;
-		ColorPhiBias = 3.25f;
-		SVGF_LARGE_KERNEL = true;
-		WiderSVGF = true;
-		ReflectionTraceResolution = 0.350f;
-		DiffuseTraceResolution = 0.5f;
-		RTAO = false;
-	}
-
-	if (HardwareProfile == 3)
-	{
-		InitialTraceResolution = 1.0f;
-		ShadowTraceResolution = 1.0f;
+		DiffuseSPP = 1;
+		ReflectionSPP = 1;
+		ColorPhiBias = 1.3f;
 		ReflectionTraceResolution = 0.5f;
 		DiffuseTraceResolution = 0.5f;
-		ReflectionSPP = 2;
+		RTAO = false;
+	}
+
+
+	if (HardwareProfile == 2) {
+		InitialTraceResolution = 1.0f;
+		ShadowTraceResolution = 1.0f;
 		DiffuseSPP = 2;
-		ColorPhiBias = 3.5f;
-		SVGF_LARGE_KERNEL = true;
-		WiderSVGF = true;
+		ReflectionSPP = 1;
+		ColorPhiBias = 1.4f;
+		ReflectionTraceResolution = 0.5f;
+		DiffuseTraceResolution = 0.5f;
+		CloudResolution = 0.5;
+		RTAO = false;
+	}
+
+	if (HardwareProfile == 3) {
+		InitialTraceResolution = 1.0f;
+		ShadowTraceResolution = 1.0f;
+		ReflectionTraceResolution = 1.0f;
+		DiffuseTraceResolution = 1.0f;
+		DiffuseSPP = 1;
+		ReflectionSPP = 1;
+		ColorPhiBias = 1.3f;
+		CloudResolution = 1.0f;
 		RTAO = false;
 	}
 
@@ -3868,6 +3875,7 @@ void VoxelRT::MainPipeline::StartPipeline()
 		TemporalAAShader.SetBool("u_DepthWeight", TAADepthWeight);
 		TemporalAAShader.SetFloat("u_DepthExponentMultiplier", TAADepthWeightExp);
 		TemporalAAShader.SetFloat("u_ColorBiasMultiplier", ColorBiasMultiplier);
+		TemporalAAShader.SetFloat("u_TAABiasAdder", TAABiasAdder);
 
 		TemporalAAShader.SetMatrix4("u_PrevProjection", PreviousProjection);
 		TemporalAAShader.SetMatrix4("u_PrevView", PreviousView);

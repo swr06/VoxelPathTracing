@@ -26,6 +26,8 @@ uniform mat4 u_InverseProjection;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
 
+uniform float u_TAABiasAdder;
+
 // TAA flag 
 uniform bool u_Enabled;
 
@@ -213,7 +215,7 @@ vec3 SampleHistory(vec2 Reprojected, vec4 WorldPosition, bool Sky, in float bias
         }
     }
 
-	float Bias = mix(0.0001f, 0.11f, clamp(biasfac*u_ColorBiasMultiplier,0.,1.));
+	float Bias = mix(0.0001f, 0.11f, clamp(biasfac*u_ColorBiasMultiplier,0.,1.))+ (u_TAABiasAdder*u_TAABiasAdder);
 
 	MinColor -= Bias;
 	MaxColor += Bias;
