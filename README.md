@@ -1,6 +1,22 @@
-# Voxel Path Tracer
+<!-- Allow this file to not have a first line heading -->
+<!-- markdownlint-disable-file MD041 -->
+
+<!-- inline html -->
+<!-- markdownlint-disable-file MD033 -->
+
+<div align="center">
+
+# Voxel Path Tracer (VXRT)
+  
+<img src="https://github.com/swr06/VoxelPathTracer/blob/Project-Main/Logo/logo.png" data-canonical-src="https://github.com/swr06/VoxelPathTracer/blob/Project-Main/Logo/logo.png" width="384" height="384" />
+  
+</div>
+</br>
+
 An ***EXPERIMENTAL*** and ***UNFINISHED*** Voxel Path Tracing Engine which has an emphasis on performance and graphics. This engine was mostly made as an experiment and a tool to help me learn more about light transport, physically based rendering, volumetrics and intersection algorithms.
 This engine was coded from scratch using C++17 and the modern OpenGL programmable pipeline (OpenGL 4.5+ and GLSL version 430+ required).
+
+</div>
 
 ## Project status 
 This project has (mostly) been abandoned and new *big* features will not be worked on anytime soon.
@@ -9,7 +25,7 @@ I intend to rewrite a voxel tracing engine in the future with much cleaner code/
 ## Features Implemented
 
 ### Rendering 
-- Voxel Ray Casting (Using the DDA Algorithm)
+- Voxel Ray Casting (using the DDA algorithm)
 - Manhattan distance field acceleration structure (Distance field generated using compute shaders on the GPU, so it can be generated dynamically.) 
 - Deferred rendering pipeline
 
@@ -54,9 +70,8 @@ I intend to rewrite a voxel tracing engine in the future with much cleaner code/
 
 ## Performance Metrics 
 
-- 20 - 22 FPS on a Vega 8 iGPU on the default low preset. (@ 768p)
-- 30 - 34 FPS on a Vega 11 iGPU on the default low preset. (@ 768p)
-- 150 - 160 FPS on a GTX 1080Ti. (@ 768p)
+- 30 FPS on a Vega 11 iGPU
+- 90-100 FPS on an RTX 3050 GPU
 
 ## Note
 - This project is still very experimental, it is not a finished product as of yet.
@@ -99,6 +114,10 @@ This project is purely educational. I own none of the assets. All the rights go 
 </br>
 
 ![day3](https://github.com/swr06/VoxelPathTracer/blob/Project-Main/Screenshots/day3.png)
+
+</br>
+
+![craft](https://github.com/swr06/VoxelPathTracer/blob/Project-Main/Screenshots/craft.png)
 
 </br>
 
