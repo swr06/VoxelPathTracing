@@ -13,8 +13,8 @@
 </div>
 </br>
 
-An ***EXPERIMENTAL*** and WIP Voxel Path Tracing Engine which has an emphasis on performance and graphics. This engine was mostly made as an experiment and a tool to help me learn more about light transport, physically based rendering, volumetrics and intersection algorithms.
-This engine was coded from scratch using C++17 and the modern OpenGL programmable pipeline (OpenGL 4.5+ and GLSL version 430+ required).
+An ***EXPERIMENTAL*** and **unfinished** Voxel Path Tracing *Engine* which has an emphasis on performance and graphics. This engine was mostly made as an experiment and a tool to help me learn more about light transport, physically based rendering, volumetrics and intersection algorithms.
+This engine was coded from scratch using C++17 and the modern OpenGL programmable pipeline (**specifically, OpenGL 4.5+ and GLSL version 430+**).
 
 </div>
 
@@ -70,15 +70,16 @@ I intend to rewrite a voxel tracing engine in the future with much cleaner code/
 
 ## Performance Metrics 
 
-- 30 FPS on a Vega 11 iGPU
-- 90-100 FPS on an RTX 3050 GPU
+- 30 FPS on a Vega 11 iGPU (on the **Low** preset)
+- 90-100 FPS on an RTX 3050 GPU (on the **Low** preset, achieves 75 FPS on the medium preset)
 
 ## Note
 - This project is still very experimental, it is not a finished product as of yet.
 - This engine has *NOT* been tested on Intel GPUs/iGPUs.
-- This engine requires OpenGL 4.5, if the window fails to initialize, then there is a good chance that your GPU does not support the required OpenGL version.
+- This engine requires OpenGL 4.5+, if the window fails to initialize, then there is a good chance that your GPU does not support the required OpenGL version.
 - If you want to report an issue/bug, then you can contact me on discord or, alternatively, via email. (See github profile page)
 - See `Controls.txt` for the controls (Or look at the console when you start up the program.)
+- You can download a release from the **RELEASES** tab. (Make sure to read the notes before launching the engine)
 
 ## Credits (Testing, programming and understanding)
 - [Lars](https://github.com/Ciwiel3/)
