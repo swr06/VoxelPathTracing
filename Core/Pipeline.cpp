@@ -24,7 +24,7 @@ static VoxelRT::OrthographicCamera OCamera(0.0f, 800.0f, 0.0f, 600.0f);
 static bool ModifiedWorld = false;
 
 // Misc print
-static bool PrintDebugcallback = true;
+static bool PrintDebugcallback = false;
 
 // Timings
 static float Frametime;
@@ -382,7 +382,8 @@ public:
 			}
 
 			ImGui::NewLine();
-			ImGui::Checkbox("PRINT OPENGL DEBUG CALLBACK OUTPUT?", &PrintDebugcallback);
+			ImGui::NewLine();
+			ImGui::Checkbox("PRINT OPENGL DEBUG CALLBACK OUTPUT? (TURN ON TO SEE ERRORS/LOG)", &PrintDebugcallback);
 			ImGui::NewLine();
 			ImGui::NewLine();
 			ImGui::Checkbox("Highlight focused block?", &HighlightFocusedBlock);
@@ -940,6 +941,11 @@ public:
 				ColorPhiBias = 2.8f;
 				ReflectionTraceResolution = 0.25f;
 				DiffuseTraceResolution = 0.25f;
+				CloudResolution = 0.5;
+				ShadowSupersampleRes = 0.75f;
+				ColorBiasMultiplier = 1.5f;
+				TAABiasAdder = 0.01;
+				ShadowSupersampleRes = 1.;
 				RTAO = false;
 			}
 
@@ -953,7 +959,10 @@ public:
 				ReflectionTraceResolution = 0.5f;
 				DiffuseTraceResolution = 0.5f;
 				ReflectionDenoisingRadiusBias = 1;
-
+				CloudResolution = 0.5;
+				ShadowSupersampleRes = 1.0f;
+				ColorBiasMultiplier = 1.0;
+				TAABiasAdder = 0.;
 				RTAO = false;
 			}
 
@@ -967,7 +976,9 @@ public:
 				DiffuseTraceResolution = 0.5f;
 				CloudResolution = 0.5;
 				ReflectionDenoisingRadiusBias = 1;
-
+				ShadowSupersampleRes = 1.0f;
+				ColorBiasMultiplier = 1.0;
+				TAABiasAdder = 0.;
 				RTAO = false;
 			}
 
@@ -980,8 +991,10 @@ public:
 				ReflectionSPP = 1;
 				CloudResolution = 1.0f;
 				ColorPhiBias = 1.0f;
+				ShadowSupersampleRes = 1.0f;
 				ReflectionDenoisingRadiusBias = 1;
-
+				ColorBiasMultiplier = 1.0;
+				TAABiasAdder = 0.;
 				RTAO = false;
 			}
 
@@ -1232,7 +1245,7 @@ void VoxelRT::MainPipeline::StartPipeline()
 	world = new VoxelRT::World();
 
 	do {
-		std::cout << "\nEnter the name of your world : ";
+		std::cout << "\nEnter the name of your world (Without spaces) : ";
 		std::cin >> world_name;
 	} while (!VoxelRT::FilenameValid(world_name));
 
@@ -1248,9 +1261,19 @@ void VoxelRT::MainPipeline::StartPipeline()
 
 			std::cout << "\nWhat type of world would you like to generate? (FLAT = 0, PLAINS = 1) : ";
 			std::cin >> gen_type;
-			std::cout << "\n\n";
+			bool genstruct = 0;
+			if (gen_type == 1) {
+				std::cout << "\nGenerate structures? (NO = 0, YES = 1) : ";
 
-			GenerateWorld(world, gen_type);
+				std::cin >> genstruct;
+				std::cout << "\n\n";
+			}
+
+			if (gen_type != 0 && gen_type != 1) {
+				gen_type = 0;
+			}
+
+			GenerateWorld(world, gen_type, genstruct);
 		}
 
 		else if (create_type == 1) {
@@ -1282,6 +1305,11 @@ void VoxelRT::MainPipeline::StartPipeline()
 
 	if (HardwareProfile == 0)
 	{
+		CloudResolution = 0.25;
+		ColorBiasMultiplier = 1.5f;
+		TAABiasAdder = 0.01;
+		ShadowSupersampleRes = 1.;
+
 		// Defaults.
 	}
 
@@ -1296,7 +1324,11 @@ void VoxelRT::MainPipeline::StartPipeline()
 		ReflectionTraceResolution = 0.5f;
 		DiffuseTraceResolution = 0.5f;
 		ReflectionDenoisingRadiusBias = 1;
+		CloudResolution = 0.25;
+		ShadowSupersampleRes = 1.;
 		RTAO = false;
+		ColorBiasMultiplier = 1.0f;
+		TAABiasAdder = 0.0;
 	}
 
 
@@ -1310,6 +1342,9 @@ void VoxelRT::MainPipeline::StartPipeline()
 		DiffuseTraceResolution = 0.5f;
 		CloudResolution = 0.5;
 		ReflectionDenoisingRadiusBias = 1;
+		ShadowSupersampleRes = 1.;
+		ColorBiasMultiplier = 1.0f;
+		TAABiasAdder = 0.0;
 		RTAO = false;
 	}
 
@@ -1323,7 +1358,10 @@ void VoxelRT::MainPipeline::StartPipeline()
 		ColorPhiBias = 1.0f;
 		CloudResolution = 1.0f;
 		ReflectionDenoisingRadiusBias = 2;
+		ShadowSupersampleRes = 1.;
 		RTAO = false;
+		ColorBiasMultiplier = 1.0f;
+		TAABiasAdder = 0.0;
 	}
 
 	// Initialize world, df generator etc 
@@ -2123,6 +2161,19 @@ void VoxelRT::MainPipeline::StartPipeline()
 
 			GenerateGBuffer.SetMatrix4("u_InverseView", inv_view);
 			GenerateGBuffer.SetMatrix4("u_InverseProjection", glm::inverse(MainCamera.GetProjectionMatrix()));
+			
+
+			GenerateGBuffer.SetInteger("u_CactusBlockProps[0]", VoxelRT::BlockDatabase::GetBlockID("Cactus"));
+			GenerateGBuffer.SetInteger("u_CactusBlockProps[1]", VoxelRT::BlockDatabase::GetBlockTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Top));
+			GenerateGBuffer.SetInteger("u_CactusBlockProps[2]", VoxelRT::BlockDatabase::GetBlockNormalTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Top));
+			GenerateGBuffer.SetInteger("u_CactusBlockProps[3]", VoxelRT::BlockDatabase::GetBlockPBRTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Top));
+			GenerateGBuffer.SetInteger("u_CactusBlockProps[4]", VoxelRT::BlockDatabase::GetBlockTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Front));
+			GenerateGBuffer.SetInteger("u_CactusBlockProps[5]", VoxelRT::BlockDatabase::GetBlockNormalTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Front));
+			GenerateGBuffer.SetInteger("u_CactusBlockProps[6]", VoxelRT::BlockDatabase::GetBlockPBRTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Front));
+			GenerateGBuffer.SetInteger("u_CactusBlockProps[7]", VoxelRT::BlockDatabase::GetBlockTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
+			GenerateGBuffer.SetInteger("u_CactusBlockProps[8]", VoxelRT::BlockDatabase::GetBlockNormalTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
+			GenerateGBuffer.SetInteger("u_CactusBlockProps[9]", VoxelRT::BlockDatabase::GetBlockPBRTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
+			
 			GenerateGBuffer.SetInteger("u_GrassBlockProps[0]", VoxelRT::BlockDatabase::GetBlockID("Grass"));
 			GenerateGBuffer.SetInteger("u_GrassBlockProps[1]", VoxelRT::BlockDatabase::GetBlockTexture("Grass", VoxelRT::BlockDatabase::BlockFaceType::Top));
 			GenerateGBuffer.SetInteger("u_GrassBlockProps[2]", VoxelRT::BlockDatabase::GetBlockNormalTexture("Grass", VoxelRT::BlockDatabase::BlockFaceType::Top));
@@ -2133,6 +2184,8 @@ void VoxelRT::MainPipeline::StartPipeline()
 			GenerateGBuffer.SetInteger("u_GrassBlockProps[7]", VoxelRT::BlockDatabase::GetBlockTexture("Grass", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
 			GenerateGBuffer.SetInteger("u_GrassBlockProps[8]", VoxelRT::BlockDatabase::GetBlockNormalTexture("Grass", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
 			GenerateGBuffer.SetInteger("u_GrassBlockProps[9]", VoxelRT::BlockDatabase::GetBlockPBRTexture("Grass", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
+			
+			
 			GenerateGBuffer.SetFloat("u_Time", glfwGetTime());
 			GenerateGBuffer.SetFloat("uTime", glfwGetTime());
 			GenerateGBuffer.SetInteger("u_LavaBlockID", BlockDatabase::GetBlockID("Lava"));
@@ -4600,6 +4653,16 @@ void VoxelRT::MainPipeline::StartPipeline()
 			CubeItemRenderer.SetInteger("u_GrassBlockProps[7]", VoxelRT::BlockDatabase::GetBlockTexture("Grass", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
 			CubeItemRenderer.SetInteger("u_GrassBlockProps[8]", VoxelRT::BlockDatabase::GetBlockNormalTexture("Grass", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
 			CubeItemRenderer.SetInteger("u_GrassBlockProps[9]", VoxelRT::BlockDatabase::GetBlockPBRTexture("Grass", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
+			CubeItemRenderer.SetInteger("u_CactusBlockProps[0]", VoxelRT::BlockDatabase::GetBlockID("Cactus"));
+			CubeItemRenderer.SetInteger("u_CactusBlockProps[1]", VoxelRT::BlockDatabase::GetBlockTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Top));
+			CubeItemRenderer.SetInteger("u_CactusBlockProps[2]", VoxelRT::BlockDatabase::GetBlockNormalTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Top));
+			CubeItemRenderer.SetInteger("u_CactusBlockProps[3]", VoxelRT::BlockDatabase::GetBlockPBRTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Top));
+			CubeItemRenderer.SetInteger("u_CactusBlockProps[4]", VoxelRT::BlockDatabase::GetBlockTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Front));
+			CubeItemRenderer.SetInteger("u_CactusBlockProps[5]", VoxelRT::BlockDatabase::GetBlockNormalTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Front));
+			CubeItemRenderer.SetInteger("u_CactusBlockProps[6]", VoxelRT::BlockDatabase::GetBlockPBRTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Front));
+			CubeItemRenderer.SetInteger("u_CactusBlockProps[7]", VoxelRT::BlockDatabase::GetBlockTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
+			CubeItemRenderer.SetInteger("u_CactusBlockProps[8]", VoxelRT::BlockDatabase::GetBlockNormalTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
+			CubeItemRenderer.SetInteger("u_CactusBlockProps[9]", VoxelRT::BlockDatabase::GetBlockPBRTexture("Cactus", VoxelRT::BlockDatabase::BlockFaceType::Bottom));
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, SkymapMain.GetTexture());

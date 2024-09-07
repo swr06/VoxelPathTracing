@@ -63,7 +63,7 @@ uniform float u_SunVisibility;
 // Multitexturing *FUCKING HACK* for only the grass block
 // **Will be removed in the future**
 uniform int u_GrassBlockProps[10];
-
+uniform int u_CactusBlockProps[10];
 
 // IDs ->
 layout (std430, binding = 0) buffer SSBO_BlockData
@@ -475,6 +475,31 @@ vec3 Radiance(vec2 LocalUV, vec2 ActualUV, bool AliasSample)
 			texture_ids.z = u_GrassBlockProps[9];
 		}
 	}
+
+    if (u_HeldBlockID == u_CactusBlockProps[0])
+    {
+        if (IntersectionNormal == NORMAL_LEFT || IntersectionNormal == NORMAL_RIGHT || IntersectionNormal == NORMAL_FRONT || IntersectionNormal == NORMAL_BACK)
+        {
+            texture_ids.x = u_CactusBlockProps[4];
+            texture_ids.y = u_CactusBlockProps[5];
+            texture_ids.z = u_CactusBlockProps[6];
+        }
+
+        else if (IntersectionNormal == NORMAL_TOP)
+        {
+            texture_ids.x = u_CactusBlockProps[1];
+            texture_ids.y = u_CactusBlockProps[2];
+            texture_ids.z = u_CactusBlockProps[3];
+        }
+
+        else if (IntersectionNormal == NORMAL_BOTTOM)
+        {
+            texture_ids.x = u_CactusBlockProps[7];
+            texture_ids.y = u_CactusBlockProps[8];
+            texture_ids.z = u_CactusBlockProps[9];
+        }
+    }
+
 
     // fetch ->
     vec3 Albedo = PixelArtFiltering(u_AlbedoTextures, vec3(UV, float(texture_ids.x)), 3).xyz; // 512, 256, 128, 64

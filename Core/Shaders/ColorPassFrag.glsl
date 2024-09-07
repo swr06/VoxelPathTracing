@@ -274,7 +274,6 @@ vec3 GetAtmosphereAndClouds()
     bool v = GetAtmosphere(Sky, NormalizedDir, SampledCloudData.w * 20.5f, SampledCloudData.w);
 
     // Night sky color shifts ->
-    Sky = mix(BasicSaturation(Sky, 0.8f), Sky, SunVisibility);
     Sky *= mix(2.6f, 1.0f, SunVisibility);
 
     if (!u_CloudsEnabled) {
@@ -283,7 +282,7 @@ vec3 GetAtmosphereAndClouds()
     }
 
     float transmittance = max(SampledCloudData.w, 0.01f);
-    return (Sky * transmittance) + SampledCloudData.xyz;
+    return (Sky * clamp(transmittance, 0.0f, 1.0)) + SampledCloudData.xyz;
 
 }
 
@@ -311,7 +310,7 @@ float ComputeShadow(vec3 world_pos, vec3 flat_normal, float upscaled)
     float PlayerShadow  = 0.0f;
     int PlayerShadowSamples = 6;
 
-    vec3 BiasedWorldPos = world_pos - (flat_normal * 0.11f);
+    vec3 BiasedWorldPos = world_pos - (flat_normal * 0.175f);
     if (u_ContactHardeningShadows) {
 		vec3 L = (u_StrongerLightDirection);
 		vec3 T = normalize(cross(L, vec3(0.0f, 1.0f, 1.0f)));
@@ -1035,6 +1034,7 @@ void main()
 			//
             
             o_EmissivityData = Emissivity;
+            o_Color += Emissivity * pow(AlbedoColor, vec3(1.5f)) * 20.;
              
             // Flicker
             if (IsLava) {

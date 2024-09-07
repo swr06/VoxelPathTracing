@@ -7,7 +7,7 @@ namespace VoxelRT
 		ParticleSystem::ParticleEmitter* GetWorldParticleEmitter(); // Implementation in Pipeline.cpp
 	}
 
-	Player::Player() : Camera(60.0f, 800.0f / 600.0f, 0.1f, 1000.0f), m_AABB(glm::vec3(0.3f, 1.0f, 0.3f))
+	Player::Player() : Camera(90.0f, 800.0f / 600.0f, 0.1f, 1000.0f), m_AABB(glm::vec3(0.3f, 1.0f, 0.3f))
 	{
 		m_Acceleration = glm::vec3(0.0f);
 		m_Velocity = glm::vec3(0.0f);

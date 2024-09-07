@@ -39,7 +39,11 @@ uniform sampler2DArray u_BlockEmissive;
 
 uniform mat4 u_InverseView;
 uniform mat4 u_InverseProjection;
+
+// THESE ARE HACKS SINCE THIS ENGINE WAS BEFORE I THOUGHT ABOUT MAKING EACH BLOCK MULTITEXTURED
+// WILL BE REMOVED!!
 uniform int u_GrassBlockProps[10];
+uniform int u_CactusBlockProps[10];
 
 uniform int u_LavaBlockID;
 uniform sampler3D u_LavaTextures[2];
@@ -544,6 +548,30 @@ vec4 GetTextureIDs(int BlockID, vec3 FlatNormal)
 	        data.y = u_GrassBlockProps[8];
 	        data.z = u_GrassBlockProps[9];
 	    }
+	}
+
+	if (BlockID == u_CactusBlockProps[0])
+	{
+		if (FlatNormal == NORMAL_LEFT || FlatNormal == NORMAL_RIGHT || FlatNormal == NORMAL_FRONT || FlatNormal == NORMAL_BACK)
+		{
+			data.x = u_CactusBlockProps[4];
+			data.y = u_CactusBlockProps[5];
+			data.z = u_CactusBlockProps[6];
+		}
+
+		else if (FlatNormal == NORMAL_TOP)
+		{
+			data.x = u_CactusBlockProps[1];
+			data.y = u_CactusBlockProps[2];
+			data.z = u_CactusBlockProps[3];
+		}
+
+		else if (FlatNormal == NORMAL_BOTTOM)
+		{
+			data.x = u_CactusBlockProps[7];
+			data.y = u_CactusBlockProps[8];
+			data.z = u_CactusBlockProps[9];
+		}
 	}
 
 	return data;

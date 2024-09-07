@@ -172,7 +172,7 @@ vec3 ClipShadow(vec2 Reprojected)
     }
 
 	vec3 HistoryShadow = texture(u_PreviousColorTexture, Reprojected).xyz;
-	return clipAABB(vec3(HistoryShadow.x), vec3(MinColor.x) - 0.025f, vec3(MaxColor.x) + 0.025f);
+	return clipAABB(vec3(HistoryShadow.x), vec3(MinColor.x) - 0.125f, vec3(MaxColor.x) + 0.125f);
 }
 
 void main()

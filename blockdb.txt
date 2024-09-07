@@ -34,6 +34,7 @@
 {
 	Name : Stone
 	Albedo : Res/Block/Stone/Albedo.png
+
 	Normal : Res/Block/Stone/Normal.png
 	PBR : Res/Block/Stone/PBR.png
 	
@@ -1047,6 +1048,28 @@
 	
 	MC_ID : 89
 }
+
+
+{
+	Name : Cactus
+	Albedo_top : Res/Block/Cactus/Top/Albedo.png
+	Albedo_bottom : Res/Block/Cactus/Top/Albedo.png
+	Albedo : Res/Block/Cactus/Side/Albedo.png
+	
+	Normal_top : Res/Block/Cactus/Top/Normal.png
+	Normal_bottom : Res/Block/Cactus/Top/Normal.png
+	Normal : Res/Block/Cactus/Side/Normal.png
+	
+	PBR_top : Res/Block/Cactus/Top/PBR.png
+	PBR_bottom : Res/Block/Cactus/Top/PBR.png
+	PBR : Res/Block/Cactus/Side/PBR.png
+	
+	SND_STEP : Cloth
+	SND_MODIFY : Cloth
+	
+	MC_ID : 81
+}
+
 
 {
 	Name : Lava

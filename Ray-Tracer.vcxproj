@@ -240,6 +240,7 @@
     <ClInclude Include="Core\ShaderManager.h" />
     <ClInclude Include="Core\SoundManager.h" />
     <ClInclude Include="Core\TAAJitter.h" />
+    <ClInclude Include="Core\Utils\Random.h" />
     <ClInclude Include="Core\VolumetricFloodFill.h" />
     <ClInclude Include="Core\World.h" />
     <ClInclude Include="Core\FpsCamera.h" />

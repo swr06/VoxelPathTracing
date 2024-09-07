@@ -488,7 +488,7 @@ void main()
 		return;
 	}
 
-	vec3 Bias = SampledNormal * vec3(0.06f);
+	vec3 Bias = SampledNormal * vec3(0.1f);
 	
 	if (true) //(u_DoFullTrace)
 	{

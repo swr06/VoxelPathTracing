@@ -413,6 +413,21 @@ void GetRayStuff(out vec3 r0, out vec3 rD) {
 	r0 = u_InverseView[3].xyz;
 }
 
+vec2 IntersectBox(in vec3 ro, in vec3 invrd, in vec3 rad)
+{
+	vec3 m = invrd;
+	vec3 n = m * ro;
+	vec3 k = abs(m) * rad;
+	vec3 t1 = -n - k;
+	vec3 t2 = -n + k;
+
+	float tN = max(max(t1.x, t1.y), t1.z);
+	float tF = min(min(t2.x, t2.y), t2.z);
+
+	if (tN > tF || tF < 0.0) return vec2(-1.0); // no intersection
+
+	return vec2(tN, tF);
+}
 
 void main()
 {
@@ -425,6 +440,17 @@ void main()
     GetRayStuff(r0, rD);
 	r.Origin = r0;
     r.Direction = normalize(rD);
+
+	float AddT = 0.0f;
+
+	if (true)
+	{
+		vec2 IntBox = IntersectBox(r.Origin - vec3(384. / 2., 128. / 2., 384. / 2.), 1. / r.Direction, vec3(384. / 2., 128.0f / 2., 384.0f / 2.));
+		if (IntBox.x > 0.0f) {
+			AddT = IntBox.x + 0.5f;
+			r.Origin += r.Direction * (AddT);
+		}
+	}
 
 	int normal_idx = 0;
 
@@ -443,6 +469,8 @@ void main()
 	}
 
 	bool intersect = t > 0.0f && id > 0;
+
+	t += AddT * float(intersect);
 
 	if (intersect)
 	{

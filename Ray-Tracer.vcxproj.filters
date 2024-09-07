@@ -451,6 +451,9 @@
     <ClInclude Include="Dependencies\enkiMI\miniz.h">
       <Filter>Source Files\voxel-rt\NBT\LibFiles</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Utils\Random.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Dependencies\fast_noise\LICENSE">
