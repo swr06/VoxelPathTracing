@@ -140,6 +140,14 @@ This project is purely educational. I own none of the assets. All the rights go 
 
 </br>
 
+![n1](https://github.com/swr06/VoxelPathTracer/blob/Project-Main/Screenshots/n1.png)
+
+</br>
+
+![n2](https://github.com/swr06/VoxelPathTracer/blob/Project-Main/Screenshots/n2.png)
+
+</br>
+
 ![amogsus](https://github.com/swr06/VoxelPathTracer/blob/Project-Main/Screenshots/amogus.png)
 
 </br>
