@@ -573,6 +573,7 @@ void SpatiallyUpscaleBuffers(vec3 BaseNormal, vec3 BaseHFNormal, float BaseRough
         for (int y = -1 ; y <= 1 ; y++) 
 		{
             
+			
 			// Calculate sample coordinate ->
             vec2 SampleCoord = g_TexCoords + (vec2(x,y)) * TexelSize;
 			
@@ -601,6 +602,13 @@ void SpatiallyUpscaleBuffers(vec3 BaseNormal, vec3 BaseHFNormal, float BaseRough
 			// To avoid division by 0
 			Weight = max(Weight, 0.00000001f);
 		    SpecWeight = max(SpecWeight, 0.00000001);
+			
+			if (BaseRoughness < 0.005f) { 
+				if (!(x == 0 && y == 0)) {
+					SpecWeight *= 0.3f;
+					
+				}
+			}
 
 			// Sum ->
 			
@@ -867,7 +875,7 @@ void main()
                     float fade = u_VXAOCutoff ? (distance(WorldPosition.xz, u_ViewerPosition.xz) < VXGI_CUTOFF ? 0.0f : 1.0f) : 0.0f;
 
                     ao = mix(ao, 1.0f, fade);
-                    ao = pow(ao, 2.2f);
+                    ao = pow(ao, 1.325f);
 					
                     SampledIndirectDiffuse.xyz *= vec3(clamp(ao, 0.05, 1.0f));
 

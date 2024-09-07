@@ -8,6 +8,7 @@ uniform sampler2D u_BloomMips[5];
 uniform sampler2D u_BloomBrightTexture;
 
 uniform bool u_HQBloomUpscale;
+uniform float u_Strength;
 
 vec4 textureBicubic(sampler2D sampler, vec2 texCoords);
 
@@ -68,15 +69,15 @@ void main() {
 	vec3 TotalBloom = vec3(0.0f);
 
 	float Weights[5] = float[5](5.75f, 4.95f, 4.9f, 4.8f, 4.75f);
-	const float DetailWeight = 7.2f;
+	const float DetailWeight = 15.0f;
 
 	TotalBloom = (BaseBrightTex * DetailWeight * 1.0f) + TotalBloom;
 	TotalBloom = (BaseBrightTex * DetailWeight * 1.0f) + TotalBloom;
-	TotalBloom = (pow(Bloom[0], vec3(1.0f / 1.1f)) * Weights[0]) + TotalBloom;
-	TotalBloom = (pow(Bloom[1], vec3(1.0f / 1.1f)) * Weights[1]) + TotalBloom;
-	TotalBloom = (pow(Bloom[2], vec3(1.0f / 1.05f)) * Weights[2]) + TotalBloom;
-	TotalBloom = (pow(Bloom[3], vec3(1.0f / 1.05f)) * Weights[3]) + TotalBloom;
-	TotalBloom = (pow(Bloom[4], vec3(1.0f / 1.05f)) * Weights[4]) + TotalBloom;
+	TotalBloom = (pow(Bloom[0], vec3(1.0f / 1.1f)) * Weights[0] * u_Strength) + TotalBloom;
+	TotalBloom = (pow(Bloom[1], vec3(1.0f / 1.1f)) * Weights[1] * u_Strength) + TotalBloom;
+	TotalBloom = (pow(Bloom[2], vec3(1.0f / 1.05f)) * Weights[2] * u_Strength) + TotalBloom;
+	TotalBloom = (pow(Bloom[3], vec3(1.0f / 1.05f)) * Weights[3] * u_Strength) + TotalBloom;
+	TotalBloom = (pow(Bloom[4], vec3(1.0f / 1.05f)) * Weights[4] * u_Strength) + TotalBloom;
 
 	float TotalWeights = DetailWeight + Weights[0] + Weights[1] + Weights[2] + Weights[3] + Weights[4];
 	TotalBloom /= TotalWeights;

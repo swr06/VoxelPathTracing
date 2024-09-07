@@ -160,7 +160,6 @@ void main()
 
 	vec3 SampledPBR = texture(u_GBufferPBR, v_TexCoords).xyz;
 	float BaseRoughness = SampledPBR.x;
-	BaseRoughness += 0.001f;
 	float RawRoughness = BaseRoughness;
 	BaseRoughness *= mix(1.0f, 0.91f, float(u_RoughnessBias));
 
@@ -351,7 +350,12 @@ void main()
 	float RoughnessPow8 = clamp(pow(BaseRoughness * 1.0f, 7.0f), 0.0000000001f, 1.0f);
 
 	EffectiveRadius = clamp(EffectiveRadius,1,15);
+	
 
+	if (RawRoughness < 0.002f) {
+		EffectiveRadius=0;
+	}
+	
 	for (int Sample = -EffectiveRadius ; Sample <= EffectiveRadius; Sample++)
 	{
 		float SampleOffset = Sample;
@@ -446,6 +450,11 @@ void main()
 
 
 	bool DoSpatial = true;
+	
+	if (RawRoughness < 0.002f) {
+		DoSpatial=false;
+		EffectiveRadius=0;
+	}
 
 	if (TotalWeight > 0.001f && DoSpatial) { 
 		FilteredColor = FilteredColor / TotalWeight;

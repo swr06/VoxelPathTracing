@@ -87,7 +87,7 @@ static bool DoSpatialUpscale = true;
 
 static bool AGGRESSIVE_DISOCCLUSION_HANDLING = true;
 static bool SVGF_LARGE_KERNEL = false;
-static float ColorPhiBias = 3.325f;
+static float ColorPhiBias = 2.8f;
 static bool USE_SVGF = true;
 static bool DO_VARIANCE_SPATIAL = true;
 static bool DO_SVGF_SPATIAL = true;
@@ -785,7 +785,7 @@ public:
 			ImGui::NewLine();
 
 			ImGui::Checkbox("Auto Exposure (WIP!) ?", &AutoExposure);
-			ImGui::SliderFloat("Exposure Multiplier", &ExposureMultiplier, 0.01f, 1.0f);
+			ImGui::SliderFloat("Exposure Multiplier", &ExposureMultiplier, 0.01f, 4.0f);
 			ImGui::Checkbox("CAS (Contrast Adaptive Sharpening)", &ContrastAdaptiveSharpening);
 			ImGui::SliderFloat("CAS SharpenAmount", &CAS_SharpenAmount, 0.0f, 0.99f);
 			ImGui::SliderFloat("Desaturation Amount", &TextureDesatAmount, 0.0f, 1.0f);
@@ -937,7 +937,7 @@ public:
 				InitialTraceResolution = 1.0f;
 				ShadowTraceResolution = 0.5f;
 				DiffuseSPP = 3;
-				ColorPhiBias = 2.0f;
+				ColorPhiBias = 2.8f;
 				ReflectionTraceResolution = 0.25f;
 				DiffuseTraceResolution = 0.25f;
 				RTAO = false;
@@ -949,9 +949,11 @@ public:
 				ShadowTraceResolution = 0.75f;
 				DiffuseSPP = 1;
 				ReflectionSPP = 1;
-				ColorPhiBias = 1.2f;
+				ColorPhiBias = 1.1f;
 				ReflectionTraceResolution = 0.5f;
 				DiffuseTraceResolution = 0.5f;
+				ReflectionDenoisingRadiusBias = 1;
+
 				RTAO = false;
 			}
 
@@ -960,10 +962,12 @@ public:
 				ShadowTraceResolution = 1.0f;
 				DiffuseSPP = 2;
 				ReflectionSPP = 1;
-				ColorPhiBias = 1.4f;
+				ColorPhiBias = 1.2f;
 				ReflectionTraceResolution = 0.5f;
 				DiffuseTraceResolution = 0.5f;
 				CloudResolution = 0.5;
+				ReflectionDenoisingRadiusBias = 1;
+
 				RTAO = false;
 			}
 
@@ -975,7 +979,9 @@ public:
 				DiffuseSPP = 1;
 				ReflectionSPP = 1;
 				CloudResolution = 1.0f;
-				ColorPhiBias = 1.3f;
+				ColorPhiBias = 1.0f;
+				ReflectionDenoisingRadiusBias = 1;
+
 				RTAO = false;
 			}
 
@@ -1269,7 +1275,7 @@ void VoxelRT::MainPipeline::StartPipeline()
 
 	int HardwareProfile = 0;
 
-	std::cout << "\nHardware Spec? (0 -> Low, 1 -> Medium, 2 -> High, 3 -> Insane) : ";
+	std::cout << "\nHardware Spec? (0 -> Low, 1 -> Medium (RECOMMENDED), 2 -> High, 3 -> Insane) : ";
 	std::cin >> HardwareProfile;
 
 	std::cout << "\n\n\n";
@@ -1286,9 +1292,10 @@ void VoxelRT::MainPipeline::StartPipeline()
 		ShadowTraceResolution = 0.75f;
 		DiffuseSPP = 1;
 		ReflectionSPP = 1;
-		ColorPhiBias = 1.3f;
+		ColorPhiBias = 1.1f;
 		ReflectionTraceResolution = 0.5f;
 		DiffuseTraceResolution = 0.5f;
+		ReflectionDenoisingRadiusBias = 1;
 		RTAO = false;
 	}
 
@@ -1298,10 +1305,11 @@ void VoxelRT::MainPipeline::StartPipeline()
 		ShadowTraceResolution = 1.0f;
 		DiffuseSPP = 2;
 		ReflectionSPP = 1;
-		ColorPhiBias = 1.4f;
+		ColorPhiBias = 1.2f;
 		ReflectionTraceResolution = 0.5f;
 		DiffuseTraceResolution = 0.5f;
 		CloudResolution = 0.5;
+		ReflectionDenoisingRadiusBias = 1;
 		RTAO = false;
 	}
 
@@ -1312,8 +1320,9 @@ void VoxelRT::MainPipeline::StartPipeline()
 		DiffuseTraceResolution = 1.0f;
 		DiffuseSPP = 1;
 		ReflectionSPP = 1;
-		ColorPhiBias = 1.3f;
+		ColorPhiBias = 1.0f;
 		CloudResolution = 1.0f;
+		ReflectionDenoisingRadiusBias = 2;
 		RTAO = false;
 	}
 
@@ -4243,6 +4252,7 @@ void VoxelRT::MainPipeline::StartPipeline()
 			CombineBloom.SetInteger("u_BloomMips[3]", 3);
 			CombineBloom.SetInteger("u_BloomMips[4]", 4);
 			CombineBloom.SetInteger("u_BloomBrightTexture", 5);
+			CombineBloom.SetFloat("u_Strength", BloomStrength);
 			CombineBloom.SetBool("u_HQBloomUpscale", HQBloomUpscale);
 			CombineBloom.SetVector2f("u_CurrentTAAJitter", glm::vec2(TAAJitter));
 
@@ -4391,7 +4401,7 @@ void VoxelRT::MainPipeline::StartPipeline()
 		PostProcessingShader.SetFloat("u_FilmGrainStrength", FilmGrainStrength);
 		PostProcessingShader.SetFloat("u_ExposureMultiplier", ExposureMultiplier);
 		PostProcessingShader.SetFloat("u_NebulaStrength", NebulaStrength);
-		PostProcessingShader.SetFloat("u_BloomStrength", BloomStrength);
+		PostProcessingShader.SetFloat("u_BloomStrength", 1.0f);
 		PostProcessingShader.SetFloat("u_DiffractionStrength", DiffractionStrength);
 
 		PostProcessingShader.SetBool("u_LensDirt", LensDirt);
